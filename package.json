@@ -1,0 +1,19 @@
+{
+  "name": "launchr-cli",
+  "version": "1.0.0",
+  "description": "Config-driven URL launcher CLI built with Node.js + zx",
+  "type": "module",
+  "bin": {
+    "launchr": "./src/cli.mjs"
+  },
+  "scripts": {
+    "start": "node ./src/cli.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "zx": "^8.8.4"
+  }
+}

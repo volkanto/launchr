@@ -1,0 +1,152 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import os from "node:os";
+import path from "node:path";
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { runCli } from "../src/cli.mjs";
+
+function createMemoryStream() {
+  let buffer = "";
+  return {
+    write(chunk) {
+      buffer += String(chunk);
+    },
+    toString() {
+      return buffer;
+    },
+  };
+}
+
+function buildSampleConfig() {
+  return {
+    grafana: {
+      description: "some useful information",
+      url: "https://grafana.com/{environments}/{query}/{timeframe}",
+      parameters: {
+        environments: {
+          type: "single-choice-list",
+          flag: "e",
+          defaultValue: "staging",
+          required: true,
+          values: ["staging", "production"],
+        },
+        query: {
+          type: "string",
+          flag: "q",
+          defaultValue: "error",
+          required: true,
+        },
+        timeframe: {
+          type: "single-choice-list",
+          flag: "t",
+          defaultValue: "5m",
+          required: true,
+          values: ["5m", "10m", "1h", "6h"],
+        },
+      },
+    },
+  };
+}
+
+async function createHomeWithConfig(configObject) {
+  const homeDir = await mkdtemp(path.join(os.tmpdir(), "launchr-cli-test-"));
+  const configDir = path.join(homeDir, ".launchr-configurations");
+  const configFile = path.join(configDir, "launchr-commands.json");
+  await mkdir(configDir, { recursive: true });
+  await writeFile(configFile, `${JSON.stringify(configObject, null, 2)}\n`, "utf8");
+  return homeDir;
+}
+
+test("runCli list prints configured commands", async () => {
+  const homeDir = await createHomeWithConfig(buildSampleConfig());
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+
+  const code = await runCli(["list"], { homeDir, stdout, stderr });
+  assert.equal(code, 0);
+  assert.match(stdout.toString(), /grafana\s+- some useful information/);
+  assert.equal(stderr.toString(), "");
+});
+
+test("runCli with no command prints custom commands with descriptions", async () => {
+  const config = {
+    ...buildSampleConfig(),
+    yutup: {
+      description: "youtube ac",
+      url: "https://youtube.com",
+      parameters: {},
+    },
+  };
+
+  const homeDir = await createHomeWithConfig(config);
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+
+  const code = await runCli([], { homeDir, stdout, stderr });
+
+  assert.equal(code, 0);
+  assert.match(stdout.toString(), /Built-in Commands:/);
+  assert.match(stdout.toString(), /Custom Commands:/);
+  assert.match(stdout.toString(), /^\s{2}help\s{2,}Show manual$/m);
+  assert.match(stdout.toString(), /^\s{2}list\s{2,}List available commands$/m);
+  assert.match(stdout.toString(), /^\s{2}init\s{2,}Interactive setup$/m);
+  assert.match(stdout.toString(), /^\s{2}grafana\s{2,}some useful information$/m);
+  assert.match(stdout.toString(), /^\s{2}yutup\s{2,}youtube ac$/m);
+  assert.equal(stderr.toString(), "");
+});
+
+test("runCli custom command validates params and opens URL", async () => {
+  const homeDir = await createHomeWithConfig(buildSampleConfig());
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+  const openedUrls = [];
+
+  const code = await runCli(
+    ["grafana", "-e", "production", "-q", "error", "-t", "5m"],
+    {
+      homeDir,
+      stdout,
+      stderr,
+      openUrlFn: async (url) => {
+        openedUrls.push(url);
+      },
+    },
+  );
+
+  assert.equal(code, 0);
+  assert.deepEqual(openedUrls, ["https://grafana.com/production/error/5m"]);
+  assert.match(stdout.toString(), /Opening URL:/);
+  assert.equal(stderr.toString(), "");
+});
+
+test("runCli command help prints dynamic options", async () => {
+  const homeDir = await createHomeWithConfig(buildSampleConfig());
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+
+  const code = await runCli(["grafana", "help"], {
+    homeDir,
+    stdout,
+    stderr,
+  });
+
+  assert.equal(code, 0);
+  assert.match(stdout.toString(), /launchr grafana -e <environments> -q <query> -t <timeframe>/);
+  assert.equal(stderr.toString(), "");
+});
+
+test("runCli exits with clear error when config creation is declined", async () => {
+  const homeDir = await mkdtemp(path.join(os.tmpdir(), "launchr-cli-test-"));
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+
+  const code = await runCli(["help"], {
+    homeDir,
+    stdout,
+    stderr,
+    promptYesNoFn: async () => false,
+  });
+
+  assert.equal(code, 1);
+  assert.match(stderr.toString(), /Configuration file is required to use this CLI/);
+});
