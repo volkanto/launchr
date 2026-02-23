@@ -1,8 +1,6 @@
 # launchr CLI
 
-<p align="center">
-  <img src="assets/launchr-logo.png" alt="launchr logo" width="420">
-</p>
+![launchr](/assets/launchr-logo.png)
 
 `launchr` is a configuration-driven CLI to build URLs from typed parameters and open them in your default browser.
 
