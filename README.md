@@ -22,6 +22,29 @@ npm link
 
 After linking, `launchr` is available in your shell.
 
+## Publish to npm (GitHub Actions)
+This repository includes an automated workflow at:
+
+`.github/workflows/publish-npm.yml`
+
+It publishes to npm when you either:
+- push a tag matching `v*`
+- publish a GitHub Release
+
+Rules:
+- tag must match package version in `package.json` (example: `v1.2.3`)
+- tests must pass before publish
+- if that version already exists on npm, publish is skipped
+
+Required GitHub secret:
+- `NPM_TOKEN`: npm automation token with publish access
+
+Typical release flow:
+```bash
+npm version patch
+git push origin main --follow-tags
+```
+
 ## Configuration Location
 `launchr` uses:
 

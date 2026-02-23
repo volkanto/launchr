@@ -1,0 +1,78 @@
+name: Publish npm Package
+
+on:
+  push:
+    tags:
+      - "v*"
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: npm-publish-${{ github.event.release.tag_name || github.ref_name }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Resolve tag name
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag matches package version
+        run: |
+          PKG_VERSION="$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")"
+          EXPECTED_TAG="v$PKG_VERSION"
+
+          if [ "${{ steps.tag.outputs.tag }}" != "$EXPECTED_TAG" ]; then
+            echo "Tag ${{ steps.tag.outputs.tag }} does not match package version $EXPECTED_TAG."
+            exit 1
+          fi
+
+      - name: Check if this version already exists on npm
+        id: npm_check
+        run: |
+          PKG_NAME="$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).name")"
+          PKG_VERSION="$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")"
+
+          if npm view "${PKG_NAME}@${PKG_VERSION}" version >/dev/null 2>&1; then
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        if: steps.npm_check.outputs.already_published != 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Skip publish (already published)
+        if: steps.npm_check.outputs.already_published == 'true'
+        run: echo "This package version is already published. Skipping."
