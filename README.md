@@ -1,62 +1,22 @@
 # launchr CLI
 
-![launchr](/assets/launchr-logo.png)
+![launchr](assets/launchr-logo.png)
 
-`launchr` is a configuration-driven CLI to build URLs from typed parameters and open them in your default browser.
+`launchr` is a configuration-driven CLI that turns typed flags into URLs and opens them in your default browser.
 
-Built with:
-- Node.js (ESM)
-- `zx`
-- `fs/promises`
+Installation and local development instructions are in [CONTRIBUTION.md](CONTRIBUTION.md).
 
-## Requirements
-- Node.js 20+
+## Product Features
+- Configuration-driven custom commands defined in JSON.
+- Interactive command creation with `launchr init` for command metadata, URL template, and parameter definitions.
+- Typed runtime parameters with support for `string`, `integer`, `boolean`, and `single-choice-list`.
+- Short-flag interface for all parameters (for example `-q`, `-e`, `-t`).
+- Dynamic help and usage output for both built-in and custom commands.
+- URL templating with named placeholders (for example `{query}`) mapped to parameter keys.
+- Automatic config bootstrap prompt when the config file does not exist.
+- Strong validation for config schema, placeholder integrity, unknown flags, required values, types, and allowed values.
 
-## Install
-```bash
-npm install
-npm link
-```
-
-After linking, `launchr` is available in your shell.
-
-## Publish to npm (GitHub Actions)
-This repository includes an automated workflow at:
-
-`.github/workflows/publish-npm.yml`
-
-It publishes to npm when you either:
-- push a tag matching `v*`
-- publish a GitHub Release
-
-Rules:
-- tag must match package version in `package.json` (example: `v1.2.3`)
-- tests must pass before publish
-- if that version already exists on npm, publish is skipped
-
-Required GitHub secret:
-- `NPM_TOKEN`: npm automation token with publish access
-
-Typical release flow:
-```bash
-npm version patch
-git push origin main --follow-tags
-```
-
-## Configuration Location
-`launchr` uses:
-
-`~/.launchr-configurations/launchr-commands.json`
-
-If the file is missing, the CLI prompts:
-
-`No configuration found. Do you want to create one? (yes/no)`
-
-If declined, the CLI exits with:
-
-`Configuration file is required to use this CLI.`
-
-## Commands
+## Built-in Commands
 ```bash
 launchr
 launchr help
@@ -66,27 +26,16 @@ launchr <custom-command> help
 launchr <custom-command> [flags]
 ```
 
-## Interactive Setup
-Run:
-```bash
-launchr init
-```
+## Configuration
+Configuration is stored at:
 
-You will be asked for:
-- command name
-- description
-- URL template (with named placeholders like `{query}`)
-- parameters (loop until `done`)
-  - key
-  - type (`string`, `integer`, `boolean`, `single-choice-list`)
-  - flag (`q` means `-q`)
-  - required (`true/false`)
-  - default value
-  - allowed values (for `single-choice-list`)
+`~/.launchr-configurations/launchr-commands.json`
 
-Type `finish` when asked for command name to stop immediately.
+If the file is missing, `launchr` prompts to create it. If you decline, the CLI exits with:
 
-## JSON Example
+`Configuration file is required to use this CLI.`
+
+## Command Definition Example
 ```json
 {
   "grafana": {
@@ -98,10 +47,7 @@ Type `finish` when asked for command name to stop immediately.
         "flag": "e",
         "defaultValue": "staging",
         "required": true,
-        "values": [
-          "staging",
-          "production"
-        ]
+        "values": ["staging", "production"]
       },
       "query": {
         "type": "string",
@@ -111,38 +57,19 @@ Type `finish` when asked for command name to stop immediately.
       },
       "timeframe": {
         "type": "single-choice-list",
-
         "flag": "t",
         "defaultValue": "5m",
         "required": true,
-        "values": [
-          "5m",
-          "10m",
-          "1h",
-          "6h"
-        ]
+        "values": ["5m", "10m", "1h", "6h"]
       }
     }
   }
 }
 ```
 
-## Usage Examples
+## Usage Example
 ```bash
 launchr list
 launchr grafana help
 launchr grafana -e production -q error -t 5m
-```
-
-## Validation and Errors
-- schema validation on config load
-- malformed JSON detection
-- required parameter checks
-- type checks (`string`, `integer`, `boolean`, `single-choice-list`)
-- allowed-value checks for `single-choice-list`
-- URL placeholder count checks
-
-## Tests
-```bash
-npm test
 ```
