@@ -17,6 +17,26 @@ function createMemoryStream() {
   };
 }
 
+function createScriptedPrompter(answers) {
+  const queue = [...answers];
+  let closed = false;
+  return {
+    async ask() {
+      if (queue.length === 0) {
+        throw new Error("No more scripted answers");
+      }
+      return queue.shift();
+    },
+    write() {},
+    close() {
+      closed = true;
+    },
+    isClosed() {
+      return closed;
+    },
+  };
+}
+
 function buildSampleConfig() {
   return {
     grafana: {
@@ -89,10 +109,70 @@ test("runCli with no command prints custom commands with descriptions", async ()
   assert.match(stdout.toString(), /Custom Commands:/);
   assert.match(stdout.toString(), /^\s{2}help\s{2,}Show manual$/m);
   assert.match(stdout.toString(), /^\s{2}list\s{2,}List available commands$/m);
-  assert.match(stdout.toString(), /^\s{2}init\s{2,}Interactive setup$/m);
+  assert.match(stdout.toString(), /^\s{2}add\s{2,}Add command interactively$/m);
   assert.match(stdout.toString(), /^\s{2}grafana\s{2,}some useful information$/m);
   assert.match(stdout.toString(), /^\s{2}yutup\s{2,}youtube ac$/m);
   assert.equal(stderr.toString(), "");
+});
+
+test("runCli add creates command via interactive flow", async () => {
+  const homeDir = await createHomeWithConfig({});
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+  const prompter = createScriptedPrompter([
+    "google",
+    "search utility",
+    "https://google.com?q={query}",
+    "query",
+    "string",
+    "q",
+    "true",
+    "",
+    "done",
+    "no",
+  ]);
+
+  const code = await runCli(["add"], {
+    homeDir,
+    stdout,
+    stderr,
+    createPrompterFn: () => prompter,
+  });
+
+  assert.equal(code, 0);
+  assert.match(stdout.toString(), /google\s+- search utility/);
+  assert.equal(stderr.toString(), "");
+  assert.equal(prompter.isClosed(), true);
+});
+
+test("runCli init remains alias for add and prints deprecation warning", async () => {
+  const homeDir = await createHomeWithConfig({});
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+  const prompter = createScriptedPrompter([
+    "google",
+    "search utility",
+    "https://google.com?q={query}",
+    "query",
+    "string",
+    "q",
+    "true",
+    "",
+    "done",
+    "no",
+  ]);
+
+  const code = await runCli(["init"], {
+    homeDir,
+    stdout,
+    stderr,
+    createPrompterFn: () => prompter,
+  });
+
+  assert.equal(code, 0);
+  assert.match(stderr.toString(), /"init" is deprecated\. Use "launchr add"\./);
+  assert.match(stdout.toString(), /google\s+- search utility/);
+  assert.equal(prompter.isClosed(), true);
 });
 
 test("runCli custom command validates params and opens URL", async () => {

@@ -1,7 +1,7 @@
 const BUILTIN_COMMANDS = [
   { name: "help", description: "Show manual" },
   { name: "list", description: "List available commands" },
-  { name: "init", description: "Interactive setup" },
+  { name: "add", description: "Add command interactively" },
 ];
 
 function formatRequired(required) {
@@ -63,7 +63,8 @@ export function buildGeneralHelp(config = {}) {
     usageText,
     "",
     "How to define commands:",
-    "  Run `launchr init` and follow prompts to create command metadata, URL templates, and parameters.",
+    "  Run `launchr add` and follow prompts to create command metadata, URL templates, and parameters.",
+    "  `launchr init` is deprecated in v1.x and will be removed in v2.0.0.",
     "",
     "How parameters work:",
     "  Each parameter has a type, a short flag, required/default rules, and optional allowed values.",
