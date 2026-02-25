@@ -4,7 +4,23 @@
 
 `launchr` is a configuration-driven CLI that turns typed flags into URLs and opens them in your default browser.
 
-Installation and local development instructions are in [CONTRIBUTION.md](CONTRIBUTION.md).
+## Install via npm
+`launchr` requires Node.js 20+.
+
+Install globally:
+
+```bash
+npm install -g launchr-cli
+launchr help
+```
+
+Run without installing globally:
+
+```bash
+npx launchr-cli help
+```
+
+Local development instructions are in [CONTRIBUTION.md](CONTRIBUTION.md).
 
 ## Product Features
 - Configuration-driven custom commands defined in JSON.
