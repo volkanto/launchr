@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>launchr CLI | Config-Driven URL Launcher</title>
+    <meta
+      name="description"
+      content="launchr is a Node.js CLI that turns typed flags into URLs and opens them in your browser."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./site.js"></script>
+  </head>
+  <body>
+    <div class="page-backdrop" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a href="#top" class="brand">
+          <img src="./assets/launchr-logo.png" alt="launchr logo" />
+          <span>launchr</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#quick-start">Quick Start</a>
+          <a href="#features">Features</a>
+          <a href="#commands">Commands</a>
+          <a href="#configuration">Configuration</a>
+          <a href="#release-notes">Release Notes</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="container hero" data-animate="1">
+        <div class="hero-copy">
+          <p class="eyebrow">Config-Driven URL Launcher</p>
+          <h1>Turn short flags into full URLs in seconds.</h1>
+          <p class="hero-lead">
+            <code>launchr</code> helps teams open dashboards, logs, and runbook
+            links from reusable command templates. Keep links typed, validated,
+            and fast to execute.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#quick-start">Start in 2 minutes</a>
+            <a class="button button-secondary" href="#commands">Explore command syntax</a>
+          </div>
+          <ul class="hero-bullets">
+            <li>Node.js 20+ CLI shipped on npm as <code>launchr-cli</code></li>
+            <li>Typed parameters: string, integer, boolean, single-choice-list</li>
+            <li>Built for repeatable operational workflows</li>
+          </ul>
+        </div>
+
+        <aside class="hero-panel">
+          <h2>Install + run</h2>
+          <p>Copy these commands to try launchr immediately.</p>
+          <div class="terminal">
+            <div class="terminal-line">
+              <code id="cmd-install">npm install -g launchr-cli</code>
+              <button type="button" data-copy-target="cmd-install">Copy</button>
+            </div>
+            <div class="terminal-line">
+              <code id="cmd-help">launchr help</code>
+              <button type="button" data-copy-target="cmd-help">Copy</button>
+            </div>
+            <div class="terminal-line">
+              <code id="cmd-list">launchr list</code>
+              <button type="button" data-copy-target="cmd-list">Copy</button>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section id="quick-start" class="container section" data-animate="2">
+        <div class="section-head">
+          <p class="eyebrow">Quick Start</p>
+          <h2>From install to first custom command</h2>
+        </div>
+        <div class="grid grid-3">
+          <article class="card">
+            <p class="step">01</p>
+            <h3>Install the CLI</h3>
+            <pre><code id="quick-install">npm install -g launchr-cli</code></pre>
+            <button type="button" class="small-copy" data-copy-target="quick-install">
+              Copy command
+            </button>
+          </article>
+          <article class="card">
+            <p class="step">02</p>
+            <h3>Create a command interactively</h3>
+            <pre><code id="quick-add">launchr add</code></pre>
+            <button type="button" class="small-copy" data-copy-target="quick-add">
+              Copy command
+            </button>
+          </article>
+          <article class="card">
+            <p class="step">03</p>
+            <h3>Run your command with flags</h3>
+            <pre><code id="quick-run">launchr grafana -e production -q error -t 5m</code></pre>
+            <button type="button" class="small-copy" data-copy-target="quick-run">
+              Copy command
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <section id="features" class="container section" data-animate="3">
+        <div class="section-head">
+          <p class="eyebrow">Features</p>
+          <h2>Made for repeatable command workflows</h2>
+        </div>
+        <div class="grid grid-2">
+          <article class="card">
+            <h3>Declarative command templates</h3>
+            <p>
+              Define URL templates once, then reuse them with typed parameters and
+              short flags.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Strong runtime validation</h3>
+            <p>
+              launchr validates command schema, placeholders, missing required
+              values, and allowed choices.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Fast command discovery</h3>
+            <p>
+              Use <code>launchr list</code> and built-in help to inspect custom
+              commands and their expected options.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Backward-compatible transition</h3>
+            <p>
+              Version 1.x supports both <code>launchr add</code> and deprecated
+              alias <code>launchr init</code>.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="commands" class="container section" data-animate="4">
+        <div class="section-head">
+          <p class="eyebrow">Commands</p>
+          <h2>Built-in command reference</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Command</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>launchr</code></td>
+                <td>Starts CLI entrypoint and prints guidance.</td>
+              </tr>
+              <tr>
+                <td><code>launchr help</code></td>
+                <td>Shows built-in help and usage details.</td>
+              </tr>
+              <tr>
+                <td><code>launchr list</code></td>
+                <td>Lists configured custom commands from your JSON config file.</td>
+              </tr>
+              <tr>
+                <td><code>launchr add</code></td>
+                <td>Interactive flow for creating a new custom command.</td>
+              </tr>
+              <tr>
+                <td><code>launchr init</code></td>
+                <td>Deprecated alias for <code>add</code> in v1.x.</td>
+              </tr>
+              <tr>
+                <td><code>launchr &lt;custom&gt; help</code></td>
+                <td>Shows usage for one configured custom command.</td>
+              </tr>
+              <tr>
+                <td><code>launchr &lt;custom&gt; [flags]</code></td>
+                <td>Builds URL from template and opens it in your browser.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="configuration" class="container section" data-animate="5">
+        <div class="section-head">
+          <p class="eyebrow">Configuration</p>
+          <h2>Command definition structure</h2>
+        </div>
+        <p class="section-copy">
+          launchr stores command definitions at
+          <code>~/.launchr-configurations/launchr-commands.json</code>.
+        </p>
+        <article class="code-card">
+          <div class="code-title">Example: grafana command</div>
+          <pre><code>{
+  "grafana": {
+    "description": "Open Grafana with typed parameters",
+    "url": "https://grafana.com/{environment}/{query}/{timeframe}",
+    "parameters": {
+      "environment": {
+        "type": "single-choice-list",
+        "flag": "e",
+        "defaultValue": "staging",
+        "required": true,
+        "values": ["staging", "production"]
+      },
+      "query": {
+        "type": "string",
+        "flag": "q",
+        "defaultValue": "error",
+        "required": true
+      },
+      "timeframe": {
+        "type": "single-choice-list",
+        "flag": "t",
+        "defaultValue": "5m",
+        "required": true,
+        "values": ["5m", "10m", "1h", "6h"]
+      }
+    }
+  }
+}</code></pre>
+        </article>
+      </section>
+
+      <section id="release-notes" class="container section" data-animate="6">
+        <div class="section-head">
+          <p class="eyebrow">Release Notes</p>
+          <h2>Recent updates</h2>
+        </div>
+        <div class="timeline">
+          <article class="timeline-item">
+            <p class="timeline-version">v1.1.0</p>
+            <h3>Command naming transition</h3>
+            <ul>
+              <li><code>launchr add</code> is now the canonical command.</li>
+              <li><code>launchr init</code> remains as a deprecated alias in v1.x.</li>
+              <li>Help text updated to guide users toward <code>add</code>.</li>
+            </ul>
+          </article>
+          <article class="timeline-item">
+            <p class="timeline-version">v1.0.0</p>
+            <h3>Stable initial release</h3>
+            <ul>
+              <li>Typed URL template commands with JSON-based configuration.</li>
+              <li>Interactive command creation and detailed runtime validation.</li>
+              <li>npm package publishing workflow with test gating.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="container section section-compact" data-animate="7">
+        <div class="section-head">
+          <p class="eyebrow">Development</p>
+          <h2>Local contributor workflow</h2>
+        </div>
+        <div class="grid grid-2">
+          <article class="card">
+            <h3>Run from source</h3>
+            <pre><code id="dev-start">npm install
+npm start -- help</code></pre>
+            <button type="button" class="small-copy" data-copy-target="dev-start">
+              Copy commands
+            </button>
+          </article>
+          <article class="card">
+            <h3>Run tests</h3>
+            <pre><code id="dev-test">npm test</code></pre>
+            <button type="button" class="small-copy" data-copy-target="dev-test">
+              Copy command
+            </button>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <p>
+          launchr CLI • Node.js 20+ • <span id="year"></span>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
