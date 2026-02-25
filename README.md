@@ -8,7 +8,7 @@ Installation and local development instructions are in [CONTRIBUTION.md](CONTRIB
 
 ## Product Features
 - Configuration-driven custom commands defined in JSON.
-- Interactive command creation with `launchr init` for command metadata, URL template, and parameter definitions.
+- Interactive command creation with `launchr add` for command metadata, URL template, and parameter definitions.
 - Typed runtime parameters with support for `string`, `integer`, `boolean`, and `single-choice-list`.
 - Short-flag interface for all parameters (for example `-q`, `-e`, `-t`).
 - Dynamic help and usage output for both built-in and custom commands.
@@ -21,10 +21,12 @@ Installation and local development instructions are in [CONTRIBUTION.md](CONTRIB
 launchr
 launchr help
 launchr list
-launchr init
+launchr add
 launchr <custom-command> help
 launchr <custom-command> [flags]
 ```
+
+`launchr init` remains available as a deprecated alias in v1.x and will be removed in v2.0.0.
 
 ## Configuration
 Configuration is stored at:

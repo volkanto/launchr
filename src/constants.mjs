@@ -1,4 +1,4 @@
-export const BUILTIN_COMMANDS = ["help", "list", "init"];
+export const BUILTIN_COMMANDS = ["help", "list", "add"];
 
 export const PARAMETER_TYPES = [
   "string",

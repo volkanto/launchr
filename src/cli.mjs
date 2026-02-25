@@ -19,6 +19,8 @@ import { promptYesNo, createPrompter } from "./utils/prompt.mjs";
 import { UsageError } from "./utils/errors.mjs";
 import { openInBrowser } from "./utils/browser.mjs";
 
+const INIT_DEPRECATION_MESSAGE = '"init" is deprecated. Use "launchr add".';
+
 function writeLine(stream, message = "") {
   stream.write(`${message}\n`);
 }
@@ -60,7 +62,11 @@ export async function runCli(argv = process.argv.slice(2), options = {}) {
       return 0;
     }
 
-    if (parsed.command === "init") {
+    if (parsed.command === "add" || parsed.command === "init") {
+      if (parsed.command === "init") {
+        writeLine(stderr, INIT_DEPRECATION_MESSAGE);
+      }
+
       const prompter = createPrompterFn({ input, output: stdout });
       try {
         config = await runInitFlow({

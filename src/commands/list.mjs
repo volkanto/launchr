@@ -1,7 +1,7 @@
 export function buildCommandList(config = {}) {
   const entries = Object.entries(config);
   if (entries.length === 0) {
-    return "No commands configured yet. Run `launchr init` to add commands.";
+    return "No commands configured yet. Run `launchr add` to add commands.";
   }
 
   return entries
