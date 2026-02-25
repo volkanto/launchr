@@ -2,6 +2,10 @@
   "name": "launchr-cli",
   "version": "1.1.1",
   "description": "Config-driven URL launcher CLI built with Node.js + zx",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/volkanto/launchr"
+  },
   "type": "module",
   "bin": {
     "launchr": "./src/cli.mjs"
