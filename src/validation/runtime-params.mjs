@@ -24,7 +24,7 @@ function parseBoolean(rawValue, paramKey) {
   throw new ValidationError(`Parameter "${paramKey}" must be boolean (true/false).`);
 }
 
-function normalizeValueByType(rawValue, parameterKey, parameterDefinition) {
+export function normalizeRuntimeParameterValue(rawValue, parameterKey, parameterDefinition) {
   switch (parameterDefinition.type) {
     case "string":
       return String(rawValue);
@@ -46,7 +46,7 @@ function normalizeValueByType(rawValue, parameterKey, parameterDefinition) {
   }
 }
 
-function hasUsableDefault(definition) {
+export function hasUsableDefault(definition) {
   return definition.defaultValue !== undefined && definition.defaultValue !== null && definition.defaultValue !== "";
 }
 
@@ -83,7 +83,7 @@ export function resolveRuntimeParameters(commandName, commandConfig, valuesByFla
       }
     }
 
-    const normalizedValue = normalizeValueByType(rawValue, parameterKey, definition);
+    const normalizedValue = normalizeRuntimeParameterValue(rawValue, parameterKey, definition);
     valuesByParameterKey[parameterKey] = normalizedValue;
     valuesInOrder.push(normalizedValue);
   }

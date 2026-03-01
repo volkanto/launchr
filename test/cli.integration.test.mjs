@@ -105,6 +105,7 @@ test("runCli with no command prints custom commands with descriptions", async ()
   const code = await runCli([], { homeDir, stdout, stderr });
 
   assert.equal(code, 0);
+  assert.match(stdout.toString(), /Usage: launchr \[--interactive\] <command> \[options\]/);
   assert.match(stdout.toString(), /Built-in Commands:/);
   assert.match(stdout.toString(), /Custom Commands:/);
   assert.match(stdout.toString(), /^\s{2}help\s{2,}Show manual$/m);
@@ -216,6 +217,56 @@ test("runCli command help prints dynamic options", async () => {
   assert.equal(stderr.toString(), "");
 });
 
+test("runCli interactive mode prompts for missing required parameters", async () => {
+  const interactiveConfig = buildSampleConfig();
+  interactiveConfig.grafana.parameters.environments.defaultValue = null;
+  interactiveConfig.grafana.parameters.timeframe.defaultValue = null;
+
+  const homeDir = await createHomeWithConfig(interactiveConfig);
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+  const openedUrls = [];
+  const prompter = createScriptedPrompter([
+    "production",
+    "5m",
+  ]);
+
+  const code = await runCli(
+    ["-i", "grafana", "-q", "error"],
+    {
+      homeDir,
+      stdout,
+      stderr,
+      isInteractiveSession: true,
+      createPrompterFn: () => prompter,
+      openUrlFn: async (url) => {
+        openedUrls.push(url);
+      },
+    },
+  );
+
+  assert.equal(code, 0);
+  assert.deepEqual(openedUrls, ["https://grafana.com/production/error/5m"]);
+  assert.equal(stderr.toString(), "");
+  assert.equal(prompter.isClosed(), true);
+});
+
+test("runCli interactive mode still fails outside a tty", async () => {
+  const homeDir = await createHomeWithConfig(buildSampleConfig());
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+
+  const code = await runCli(["--interactive", "grafana", "-q", "error"], {
+    homeDir,
+    stdout,
+    stderr,
+    isInteractiveSession: false,
+  });
+
+  assert.equal(code, 1);
+  assert.match(stderr.toString(), /Interactive mode requires a TTY/);
+});
+
 test("runCli completion zsh prints installable completion function without requiring config", async () => {
   const homeDir = await mkdtemp(path.join(os.tmpdir(), "launchr-cli-test-"));
   const stdout = createMemoryStream();
@@ -232,6 +283,7 @@ test("runCli completion zsh prints installable completion function without requi
 
   assert.equal(code, 0);
   assert.match(stdout.toString(), /#compdef launchr/);
+  assert.match(stdout.toString(), /--interactive/);
   assert.match(stdout.toString(), /launchr __complete top/);
   assert.equal(stderr.toString(), "");
 });
