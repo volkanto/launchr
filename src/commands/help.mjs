@@ -1,8 +1,4 @@
-const BUILTIN_COMMANDS = [
-  { name: "help", description: "Show manual" },
-  { name: "list", description: "List available commands" },
-  { name: "add", description: "Add command interactively" },
-];
+import { BUILTIN_COMMANDS } from "../constants.mjs";
 
 function formatRequired(required) {
   return required ? "required" : "optional";

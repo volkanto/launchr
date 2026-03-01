@@ -4,6 +4,10 @@ import os from "node:os";
 import { realpathSync } from "node:fs";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
+import {
+  buildZshCompletionScript,
+  resolveCompletionResponse,
+} from "./commands/completion.mjs";
 import { buildGeneralHelp, buildCommandHelp, buildUsageText } from "./commands/help.mjs";
 import { runInitFlow } from "./commands/init.mjs";
 import { buildCommandList } from "./commands/list.mjs";
@@ -14,15 +18,27 @@ import {
   loadConfiguration,
   saveConfiguration,
 } from "./config/store.mjs";
+import { HIDDEN_COMMANDS } from "./constants.mjs";
 import { parseArgv } from "./parsing/argv.mjs";
 import { promptYesNo, createPrompter } from "./utils/prompt.mjs";
-import { UsageError } from "./utils/errors.mjs";
+import { ConfigError, UsageError } from "./utils/errors.mjs";
 import { openInBrowser } from "./utils/browser.mjs";
 
 const INIT_DEPRECATION_MESSAGE = '"init" is deprecated. Use "launchr add".';
 
 function writeLine(stream, message = "") {
   stream.write(`${message}\n`);
+}
+
+async function loadConfigurationIfPresent(configFilePath) {
+  try {
+    return await loadConfiguration(configFilePath);
+  } catch (error) {
+    if (error instanceof ConfigError && /Configuration file not found/.test(error.message)) {
+      return {};
+    }
+    throw error;
+  }
 }
 
 export async function runCli(argv = process.argv.slice(2), options = {}) {
@@ -36,8 +52,24 @@ export async function runCli(argv = process.argv.slice(2), options = {}) {
 
   const configDirPath = getConfigDirPath(homeDir);
   const configFilePath = getConfigFilePath(homeDir);
+  const parsed = parseArgv(argv);
 
   try {
+    if (parsed.command === "completion") {
+      if (parsed.rest[0] !== "zsh") {
+        throw new UsageError('Unsupported shell. Run "launchr completion zsh".');
+      }
+
+      writeLine(stdout, buildZshCompletionScript());
+      return 0;
+    }
+
+    if (HIDDEN_COMMANDS.includes(parsed.command)) {
+      const config = await loadConfigurationIfPresent(configFilePath);
+      writeLine(stdout, resolveCompletionResponse(config, parsed.rest));
+      return 0;
+    }
+
     await ensureConfigExistsOrPromptCreate({
       configDirPath,
       configFilePath,
@@ -45,7 +77,6 @@ export async function runCli(argv = process.argv.slice(2), options = {}) {
     });
 
     let config = await loadConfiguration(configFilePath);
-    const parsed = parseArgv(argv);
 
     if (!parsed.command) {
       writeLine(stdout, buildUsageText(config));

@@ -53,6 +53,24 @@ If the file is missing, `launchr` prompts to create it. If you decline, the CLI 
 
 `Configuration file is required to use this CLI.`
 
+## Zsh Completion
+Generate the completion function:
+
+```bash
+mkdir -p ~/.zsh/completions
+launchr completion zsh > ~/.zsh/completions/_launchr
+```
+
+Add this to `~/.zshrc` if it is not already present:
+
+```bash
+fpath=(~/.zsh/completions $fpath)
+autoload -Uz compinit
+compinit
+```
+
+After reloading your shell, `launchr <TAB>` completes built-in commands and your saved command names from `~/.launchr-configurations/launchr-commands.json`.
+
 ## Command Definition Example
 ```json
 {
