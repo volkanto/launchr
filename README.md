@@ -27,6 +27,7 @@ Local development instructions are in [CONTRIBUTION.md](CONTRIBUTION.md).
 - Interactive command creation with `launchr add` for command metadata, URL template, and parameter definitions.
 - Typed runtime parameters with support for `string`, `integer`, `boolean`, and `single-choice-list`.
 - Short-flag interface for all parameters (for example `-q`, `-e`, `-t`).
+- Optional interactive mode with `-i` / `--interactive` for prompting missing required parameters.
 - Dynamic help and usage output for both built-in and custom commands.
 - URL templating with named placeholders (for example `{query}`) mapped to parameter keys.
 - Automatic config bootstrap prompt when the config file does not exist.
@@ -38,6 +39,7 @@ launchr
 launchr help
 launchr list
 launchr add
+launchr --interactive <custom-command> [flags]
 launchr <custom-command> help
 launchr <custom-command> [flags]
 ```
@@ -70,6 +72,15 @@ compinit
 ```
 
 After reloading your shell, `launchr <TAB>` completes built-in commands and your saved command names from `~/.launchr-configurations/launchr-commands.json`.
+
+## Interactive Mode
+Use `-i` or `--interactive` before the custom command to prompt for missing required parameters instead of exiting immediately:
+
+```bash
+launchr -i grafana -q error
+```
+
+This keeps the default behavior strict for scripts and automation, while still allowing interactive data entry in a terminal.
 
 ## Command Definition Example
 ```json
@@ -108,4 +119,5 @@ After reloading your shell, `launchr <TAB>` completes built-in commands and your
 launchr list
 launchr grafana help
 launchr grafana -e production -q error -t 5m
+launchr -i grafana -q error
 ```

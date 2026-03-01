@@ -46,6 +46,7 @@ export async function runCli(argv = process.argv.slice(2), options = {}) {
   const stderr = options.stderr ?? process.stderr;
   const input = options.input ?? process.stdin;
   const homeDir = options.homeDir ?? os.homedir();
+  const isInteractiveSession = options.isInteractiveSession ?? Boolean(input.isTTY && stdout.isTTY);
   const promptYesNoFn = options.promptYesNoFn ?? promptYesNo;
   const createPrompterFn = options.createPrompterFn ?? createPrompter;
   const openUrlFn = options.openUrlFn ?? openInBrowser;
@@ -124,14 +125,28 @@ export async function runCli(argv = process.argv.slice(2), options = {}) {
       return 0;
     }
 
-    const result = await runCustomCommand({
-      commandName: parsed.command,
-      commandConfig,
-      argv: parsed.rest,
-      openUrl: openUrlFn,
-    });
-    writeLine(stdout, `Opening URL: ${result.finalUrl}`);
-    return 0;
+    if (parsed.options.interactive && !isInteractiveSession) {
+      throw new UsageError('Interactive mode requires a TTY. Run "launchr --interactive <command>" in a terminal.');
+    }
+
+    const prompter = parsed.options.interactive
+      ? createPrompterFn({ input, output: stdout })
+      : null;
+
+    try {
+      const result = await runCustomCommand({
+        commandName: parsed.command,
+        commandConfig,
+        argv: parsed.rest,
+        interactive: parsed.options.interactive,
+        prompter,
+        openUrl: openUrlFn,
+      });
+      writeLine(stdout, `Opening URL: ${result.finalUrl}`);
+      return 0;
+    } finally {
+      prompter?.close();
+    }
   } catch (error) {
     writeLine(stderr, error.message);
     return 1;

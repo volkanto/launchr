@@ -68,7 +68,7 @@
           <ul class="hero-bullets">
             <li>Node.js 20+ CLI shipped on npm as <code>launchr-cli</code></li>
             <li>Typed parameters: string, integer, boolean, single-choice-list</li>
-            <li>Built for repeatable operational workflows</li>
+            <li>Zsh tab completion sourced from your saved command config</li>
           </ul>
         </div>
 
@@ -116,8 +116,9 @@
           </article>
           <article class="card">
             <p class="step">03</p>
-            <h3>Run your command with flags</h3>
-            <pre><code id="quick-run">launchr grafana -e production -q error -t 5m</code></pre>
+            <h3>Enable zsh completion</h3>
+            <pre><code id="quick-run">mkdir -p ~/.zsh/completions
+launchr completion zsh > ~/.zsh/completions/_launchr</code></pre>
             <button type="button" class="small-copy" data-copy-target="quick-run">
               Copy command
             </button>
@@ -146,10 +147,18 @@
             </p>
           </article>
           <article class="card">
+            <h3>Opt-in interactive entry</h3>
+            <p>
+              Use <code>-i</code> or <code>--interactive</code> before a custom
+              command to fill missing required parameters in a terminal.
+            </p>
+          </article>
+          <article class="card">
             <h3>Fast command discovery</h3>
             <p>
               Use <code>launchr list</code> and built-in help to inspect custom
-              commands and their expected options.
+              commands. In zsh, <code>launchr &lt;TAB&gt;</code> also completes saved
+              command names from your config.
             </p>
           </article>
           <article class="card">
@@ -193,6 +202,10 @@
                 <td>Interactive flow for creating a new custom command.</td>
               </tr>
               <tr>
+                <td><code>launchr -i &lt;custom&gt; [flags]</code></td>
+                <td>Prompts for missing required parameters in an interactive terminal.</td>
+              </tr>
+              <tr>
                 <td><code>launchr init</code></td>
                 <td>Deprecated alias for <code>add</code> in v1.x.</td>
               </tr>
@@ -207,6 +220,12 @@
             </tbody>
           </table>
         </div>
+        <p class="section-copy">
+          Shell setup: generate the zsh completion file with
+          <code>launchr completion zsh &gt; ~/.zsh/completions/_launchr</code>.
+          This is a setup command and is intentionally hidden from the normal
+          top-level command list.
+        </p>
       </section>
 
       <section id="configuration" class="container section" data-animate="5">
@@ -218,14 +237,18 @@
           launchr stores command definitions at
           <code>~/.launchr-configurations/launchr-commands.json</code>.
         </p>
+        <p class="section-copy">
+          Saved command names in this file are also what zsh completion shows
+          after <code>launchr</code>.
+        </p>
         <article class="code-card">
           <div class="code-title">Example: grafana command</div>
           <pre><code>{
   "grafana": {
     "description": "Open Grafana with typed parameters",
-    "url": "https://grafana.com/{environment}/{query}/{timeframe}",
+    "url": "https://grafana.com/{environments}/{query}/{timeframe}",
     "parameters": {
-      "environment": {
+      "environments": {
         "type": "single-choice-list",
         "flag": "e",
         "defaultValue": "staging",
@@ -258,7 +281,16 @@
         </div>
         <div class="timeline">
           <article class="timeline-item">
-            <p class="timeline-version">v1.1.0</p>
+            <p class="timeline-version">v1.2.0</p>
+            <h3>Completion and interactive mode</h3>
+            <ul>
+              <li>Zsh completion now resolves built-ins and saved custom command names from config.</li>
+              <li><code>launchr completion zsh</code> remains available as a setup-only command.</li>
+              <li><code>-i</code> / <code>--interactive</code> can prompt for missing required parameters.</li>
+            </ul>
+          </article>
+          <article class="timeline-item">
+            <p class="timeline-version">v1.1.1</p>
             <h3>Command naming transition</h3>
             <ul>
               <li><code>launchr add</code> is now the canonical command.</li>

@@ -180,6 +180,7 @@ local context state
 typeset -A opt_args
 
 _arguments -C \\
+  '(-i --interactive)'{-i,--interactive}'[Prompt for missing required parameters]' \\
   '1:command:->command' \\
   '*::argument:->args'
 
@@ -191,13 +192,32 @@ case "$state" in
     return
     ;;
   args)
-    local selected_command="\${words[2]}"
+    local selected_command=""
+    local -a command_args
+    local word_index
+    local arg_index
+
+    for (( word_index = 2; word_index <= \${#words}; word_index += 1 )); do
+      case "\${words[word_index]}" in
+        -i|--interactive)
+          continue
+          ;;
+        *)
+          selected_command="\${words[word_index]}"
+          for (( arg_index = word_index + 1; arg_index <= \${#words}; arg_index += 1 )); do
+            command_args+=("\${words[arg_index]}")
+          done
+          break
+          ;;
+      esac
+    done
+
     if [[ -z "$selected_command" ]]; then
       return
     fi
 
     local -a args
-    args=("\${(@f)\$(launchr __complete args "$selected_command" "\${words[@]:3}")}")
+    args=("\${(@f)\$(launchr __complete args "$selected_command" "\${command_args[@]}")}")
     if (( \${#args[@]} > 0 )); then
       _describe -t arguments "$selected_command arguments" args
     fi

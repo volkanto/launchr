@@ -43,7 +43,7 @@ export function buildUsageText(config = {}) {
   });
 
   return [
-    "Usage: launchr <command> [options]",
+    "Usage: launchr [--interactive] <command> [options]",
     "",
     "Built-in Commands:",
     ...formatCommandRows(BUILTIN_COMMANDS),
@@ -66,10 +66,14 @@ export function buildGeneralHelp(config = {}) {
     "  Each parameter has a type, a short flag, required/default rules, and optional allowed values.",
     "  URL templates use named placeholders like `{query}` mapped by parameter key.",
     "",
+    "Global Options:",
+    "  -i, --interactive  Prompt for missing required parameters.",
+    "",
     "Examples:",
     "  launchr list",
     "  launchr grafana help",
     "  launchr grafana -e production -q error -t 5m",
+    "  launchr -i grafana -q error",
   ].join("\n");
 }
 
