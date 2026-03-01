@@ -1,4 +1,10 @@
-export const BUILTIN_COMMANDS = ["help", "list", "add"];
+export const BUILTIN_COMMANDS = [
+  { name: "help", description: "Show manual" },
+  { name: "list", description: "List available commands" },
+  { name: "add", description: "Add command interactively" },
+];
+
+export const HIDDEN_COMMANDS = ["__complete"];
 
 export const PARAMETER_TYPES = [
   "string",

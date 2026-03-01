@@ -110,6 +110,7 @@ test("runCli with no command prints custom commands with descriptions", async ()
   assert.match(stdout.toString(), /^\s{2}help\s{2,}Show manual$/m);
   assert.match(stdout.toString(), /^\s{2}list\s{2,}List available commands$/m);
   assert.match(stdout.toString(), /^\s{2}add\s{2,}Add command interactively$/m);
+  assert.doesNotMatch(stdout.toString(), /^\s{2}completion\s{2,}Generate shell completion scripts$/m);
   assert.match(stdout.toString(), /^\s{2}grafana\s{2,}some useful information$/m);
   assert.match(stdout.toString(), /^\s{2}yutup\s{2,}youtube ac$/m);
   assert.equal(stderr.toString(), "");
@@ -213,6 +214,108 @@ test("runCli command help prints dynamic options", async () => {
   assert.equal(code, 0);
   assert.match(stdout.toString(), /launchr grafana -e <environments> -q <query> -t <timeframe>/);
   assert.equal(stderr.toString(), "");
+});
+
+test("runCli completion zsh prints installable completion function without requiring config", async () => {
+  const homeDir = await mkdtemp(path.join(os.tmpdir(), "launchr-cli-test-"));
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+
+  const code = await runCli(["completion", "zsh"], {
+    homeDir,
+    stdout,
+    stderr,
+    promptYesNoFn: async () => {
+      throw new Error("prompt should not be called for completion");
+    },
+  });
+
+  assert.equal(code, 0);
+  assert.match(stdout.toString(), /#compdef launchr/);
+  assert.match(stdout.toString(), /launchr __complete top/);
+  assert.equal(stderr.toString(), "");
+});
+
+test("runCli __complete top returns built-ins and configured commands", async () => {
+  const config = {
+    ...buildSampleConfig(),
+    youtube: {
+      description: "video search",
+      url: "https://youtube.com/results?search_query={query}",
+      parameters: {
+        query: {
+          type: "string",
+          flag: "q",
+          required: true,
+        },
+      },
+    },
+  };
+
+  const homeDir = await createHomeWithConfig(config);
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+
+  const code = await runCli(["__complete", "top"], { homeDir, stdout, stderr });
+
+  assert.equal(code, 0);
+  assert.match(stdout.toString(), /^help:Show manual$/m);
+  assert.doesNotMatch(stdout.toString(), /^completion:Generate shell completion scripts$/m);
+  assert.match(stdout.toString(), /^grafana:some useful information$/m);
+  assert.match(stdout.toString(), /^youtube:video search$/m);
+  assert.equal(stderr.toString(), "");
+});
+
+test("runCli __complete top skips config bootstrap when config is missing", async () => {
+  const homeDir = await mkdtemp(path.join(os.tmpdir(), "launchr-cli-test-"));
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+
+  const code = await runCli(["__complete", "top"], {
+    homeDir,
+    stdout,
+    stderr,
+    promptYesNoFn: async () => {
+      throw new Error("prompt should not be called for shell completion");
+    },
+  });
+
+  assert.equal(code, 0);
+  assert.match(stdout.toString(), /^help:Show manual$/m);
+  assert.doesNotMatch(stdout.toString(), /^completion:Generate shell completion scripts$/m);
+  assert.equal(stderr.toString(), "");
+});
+
+test("runCli __complete args returns help, flags, and list values for configured command", async () => {
+  const homeDir = await createHomeWithConfig(buildSampleConfig());
+  const stdout = createMemoryStream();
+  const stderr = createMemoryStream();
+
+  const topLevelCode = await runCli(["__complete", "args", "grafana"], {
+    homeDir,
+    stdout,
+    stderr,
+  });
+
+  assert.equal(topLevelCode, 0);
+  assert.match(stdout.toString(), /^help:Show help for grafana$/m);
+  assert.match(stdout.toString(), /^-e:environments$/m);
+  assert.match(stdout.toString(), /^-q:query$/m);
+  assert.match(stdout.toString(), /^-t:timeframe$/m);
+  assert.equal(stderr.toString(), "");
+
+  const valueStdout = createMemoryStream();
+  const valueStderr = createMemoryStream();
+  const valueCode = await runCli(["__complete", "args", "grafana", "-e"], {
+    homeDir,
+    stdout: valueStdout,
+    stderr: valueStderr,
+  });
+
+  assert.equal(valueCode, 0);
+  assert.match(valueStdout.toString(), /^staging:environments$/m);
+  assert.match(valueStdout.toString(), /^production:environments$/m);
+  assert.equal(valueStderr.toString(), "");
 });
 
 test("runCli exits with clear error when config creation is declined", async () => {
