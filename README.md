@@ -1,8 +1,14 @@
 # launchr CLI
 
-![launchr](assets/launchr-logo.png)
+-- ![launchr](assets/launchr-logo.png)
 
 `launchr` is a configuration-driven CLI that turns typed flags into URLs and opens them in your default browser.
+
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/volkanto/launchr/codeql-analysis.yml)
+[![version](https://img.shields.io/npm/v/launchr-cli.svg?style=flat-square)](https://npmjs.org/launchr-cli)
+[![dependancies](https://img.shields.io/librariesio/release/npm/launchr-cli?color=%23007a1f&style=flat-square)](https://libraries.io/npm/launchr-cli)
+[![downloads](https://img.shields.io/npm/dm/launchr-cli?style=flat-square&color=%23007a1f)](https://npmcharts.com/compare/launchr-cli)
+[![license](https://img.shields.io/npm/l/launchr?color=%23007a1f&style=flat-square)](https://github.com//volkanto/blob/master/LICENSE)
 
 ## Install via npm
 `launchr` requires Node.js 20+.
