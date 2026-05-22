@@ -4,7 +4,7 @@
 
 `launchr` is a configuration-driven CLI that turns typed flags into URLs and opens them in your default browser.
 
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/volkanto/launchr/codeql-analysis.yml)
+-- ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/volkanto/launchr/codeql-analysis.yml)
 [![version](https://img.shields.io/npm/v/launchr-cli.svg?style=flat-square)](https://npmjs.org/launchr-cli)
 [![dependancies](https://img.shields.io/librariesio/release/npm/launchr-cli?color=%23007a1f&style=flat-square)](https://libraries.io/npm/launchr-cli)
 [![downloads](https://img.shields.io/npm/dm/launchr-cli?style=flat-square&color=%23007a1f)](https://npmcharts.com/compare/launchr-cli)
